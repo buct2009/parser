@@ -64,14 +64,15 @@ var charsetInfos = map[string]*Charset{
 
 // All the names supported collations should be in the following table.
 var supportedCollationNames = map[string]struct{}{
-	CollationUTF8:    {},
-	CollationUTF8MB3: {},
-	CollationUTF8MB4: {},
-	CollationUTF16:   {},
-	CollationUTF32:   {},
-	CollationASCII:   {},
-	CollationLatin1:  {},
-	CollationBin:     {},
+	CollationUTF8:               {},
+	CollationUTF8MB3:            {},
+	CollationUTF8MB3_GENERAL_CI: {},
+	CollationUTF8MB4:            {},
+	CollationUTF16:              {},
+	CollationUTF32:              {},
+	CollationASCII:              {},
+	CollationLatin1:             {},
+	CollationBin:                {},
 }
 
 // GetSupportedCharsets gets descriptions for all charsets supported so far.
@@ -198,6 +199,8 @@ const (
 	CharsetUTF8MB3 = "utf8mb3"
 	// CollationUTF8MB3 is the default collation for CharsetUTF8MB3.
 	CollationUTF8MB3 = "utf8mb3_bin"
+	// CollationUTF8MB3_GENERAL_CI collation for CharsetUTF8MB3.
+	CollationUTF8MB3_GENERAL_CI = "utf8mb3_general_ci"
 	// CharsetASCII is a subset of UTF8.
 	CharsetASCII = "ascii"
 	// CollationASCII is the default collation for CharsetACSII.
