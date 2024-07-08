@@ -45,7 +45,8 @@ type FieldType struct {
 	Charset string
 	Collate string
 	// Elems is the element list for enum and set type.
-	Elems []string
+	Elems  []string
+	ElemTp *FieldType
 }
 
 // NewFieldType returns a FieldType,
@@ -326,12 +327,6 @@ func (ft *FieldType) RestoreAsCastType(ctx *format.RestoreCtx, explicitCharset b
 		} else {
 			ctx.WriteKeyWord("SIGNED")
 		}
-	case mysql.TypeLonglongArray:
-		if ft.Flag&mysql.UnsignedFlag != 0 {
-			ctx.WriteKeyWord("UNSIGNED ARRAY")
-		} else {
-			ctx.WriteKeyWord("SIGNED ARRAY")
-		}
 	case mysql.TypeJSON:
 		ctx.WriteKeyWord("JSON")
 	case mysql.TypeDouble:
@@ -340,6 +335,64 @@ func (ft *FieldType) RestoreAsCastType(ctx *format.RestoreCtx, explicitCharset b
 		ctx.WriteKeyWord("FLOAT")
 	case mysql.TypeYear:
 		ctx.WriteKeyWord("YEAR")
+	case mysql.TypeArray:
+		switch ft.ElemTp.Tp {
+		case mysql.TypeVarString:
+			skipWriteBinary := false
+			if ft.Charset == charset.CharsetBin && ft.Collate == charset.CollationBin {
+				ctx.WriteKeyWord("BINARY")
+				skipWriteBinary = true
+			} else {
+				ctx.WriteKeyWord("CHAR")
+			}
+			if ft.Flen != UnspecifiedLength {
+				ctx.WritePlainf("(%d)", ft.Flen)
+			}
+			if !explicitCharset {
+				return
+			}
+			if !skipWriteBinary && ft.Flag&mysql.BinaryFlag != 0 {
+				ctx.WriteKeyWord(" BINARY")
+			}
+			if ft.Charset != charset.CharsetBin && ft.Charset != mysql.DefaultCharset {
+				ctx.WriteKeyWord(" CHARSET ")
+				ctx.WriteKeyWord(ft.Charset)
+			}
+		case mysql.TypeDate:
+			ctx.WriteKeyWord("DATE")
+		case mysql.TypeDatetime:
+			ctx.WriteKeyWord("DATETIME")
+			if ft.Decimal > 0 {
+				ctx.WritePlainf("(%d)", ft.Decimal)
+			}
+		case mysql.TypeNewDecimal:
+			ctx.WriteKeyWord("DECIMAL")
+			if ft.Flen > 0 && ft.Decimal > 0 {
+				ctx.WritePlainf("(%d, %d)", ft.Flen, ft.Decimal)
+			} else if ft.Flen > 0 {
+				ctx.WritePlainf("(%d)", ft.Flen)
+			}
+		case mysql.TypeDuration:
+			ctx.WriteKeyWord("TIME")
+			if ft.Decimal > 0 {
+				ctx.WritePlainf("(%d)", ft.Decimal)
+			}
+		case mysql.TypeLonglong:
+			if ft.Flag&mysql.UnsignedFlag != 0 {
+				ctx.WriteKeyWord("UNSIGNED")
+			} else {
+				ctx.WriteKeyWord("SIGNED")
+			}
+		case mysql.TypeJSON:
+			ctx.WriteKeyWord("JSON")
+		case mysql.TypeDouble:
+			ctx.WriteKeyWord("DOUBLE")
+		case mysql.TypeFloat:
+			ctx.WriteKeyWord("FLOAT")
+		case mysql.TypeYear:
+			ctx.WriteKeyWord("YEAR")
+		}
+		ctx.WriteKeyWord(" ARRAY")
 	}
 }
 
