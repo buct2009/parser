@@ -487,6 +487,7 @@ const (
 	ColumnOptionColumnFormat
 	ColumnOptionStorage
 	ColumnOptionAutoRandom
+	ColumnOptionVisible
 )
 
 var (
@@ -517,6 +518,7 @@ type ColumnOption struct {
 	// Name is only used for Check Constraint name.
 	ConstraintName string
 	PrimaryKeyTp   model.PrimaryKeyType
+	Visible        bool
 }
 
 // Restore implements Node interface.
